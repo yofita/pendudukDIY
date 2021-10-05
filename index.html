@@ -1,0 +1,196 @@
+<html>
+    <head>
+    <title>Peta Infografis Penduduk DIY</title>
+	<!-- Load plotly.js into the DOM -->
+	<script src='https://cdn.plot.ly/plotly-2.4.2.min.js'></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+</head>
+<style>
+    /* style untuk grafik */
+    div.absolute {
+      position: absolute;
+      top: 160px;
+      right: 20px;
+      width: 500px;
+      height: 100px;
+    }
+    /* style untuk peta choropleth */
+    #myDiv {
+            position: absolute;
+            top: 0px;
+            bottom: 0;
+            width: 65%;
+            height: 100%;
+            }
+</style>
+<body>
+    <!-- menggunakan get element untuk membuat tulisam -->
+    <script>
+        var judul = document.createElement("h1");
+        judul.id = 'peta';
+        judul.textContent = "Peta Infografis";
+        document.body.append(judul);
+        var posisi = document.getElementById('peta');
+        posisi.style.margin = "0px 0px 0px 1260px";
+        posisi.style.fontFamily = "poppins";
+        posisi.style.color = '#4d74b3';
+    </script>
+    <script>
+        var footer = document.createElement('h2');
+        footer.textContent = 'Jumlah Penduduk di Provinsi D.I. Yogyakarta 2010 - 2020';
+        document.body.append(footer);
+        footer.style.fontSize = '20px';
+        footer.style.margin = "5px 5px 0px 1020px";
+        footer.style.textAlign = "right";
+        footer.style.fontFamily = "poppins";
+        setInterval(function(){
+            footer.style.color = '#2d288f';
+            setTimeout(function(){
+                footer.style.color = 'black';
+            }, 500)
+        }, 1000);
+    </script>
+    <script>
+        var pembuka = document.createElement('h4');
+        pembuka.textContent = 'Yofita Indah Saputri';
+        document.body.append(pembuka);
+        pembuka.style.fontSize = '10px';
+        pembuka.style.margin = "520px 0px 0px 0px";
+        pembuka.style.textAlign = "right";
+        pembuka.style.fontFamily = "poppins";
+    </script>
+
+    <!-- memuat peta -->
+	<div id='myDiv'>
+        <script>
+        var data = [{
+        type: "choroplethmapbox", 
+        name: "Jumlah Penduduk", 
+        geojson: "https://raw.githubusercontent.com/yofita/penyakit/main/Kab_DIY_pop20_1.json", 
+        locations: [ "Bantul", "Yogyakarta", "Sleman", "Gunungkidul", "Kulonprogo"],
+        z: [ 1029997, 435936, 1232598, 749274, 434483],
+        zmin: 400000, 
+        zmax: 1400000, 
+        colorbar: {y: 0, 
+                  yanchor: "bottom", 
+                  title: {text: "Jumlah Penduduk", side: "right"}}}
+    ];
+        
+        // mengatur layout
+        var layout = {mapbox: {style: "dark", center: {lon: 110.45, lat: -7.87}, zoom: 9}};
+        // mengatur token mapbox
+        var config = {mapboxAccessToken: "pk.eyJ1IjoieW9maXRhaXMiLCJhIjoiY2p0aW8zanJyMTdyOTQ5cGR4YjJic3B5dyJ9.Tce6StmMTcSGqmNAngOGNg"};
+        // menampilkan data
+        Plotly.newPlot('myDiv', data, layout, config);
+        </script>
+    </div>
+
+    <!-- mengatur div untuk grafik -->
+    <div class="absolute">
+         <div class="showcase__section" id="bubble">
+         <div class="spacer --small"></div>
+         <div id="bubbleplots">
+             <div class="bubbleplot" data-num="0">
+             <div class="plot" id="plotdiv"></div>
+             <div class="control-row">
+                 Kabupaten/Kota: <select class="kabdata">
+                 </select>
+             </div>
+             </div>
+             </div>
+        </div>
+        </div>
+
+        <!-- memuat grafik -->
+        <script>
+        Plotly.d3.csv('https://raw.githubusercontent.com/yofita/penyakit/main/jml_pend_DIY_1.csv', function(err, rows){
+        
+        // membedah/memecah belah kolom
+        function unpack(rows, key) {
+        return rows.map(function(row) { return row[key]; });
+        }
+        var allNamaKab = unpack(rows, 'kab'),
+            allYear = unpack(rows, 'year'),
+            allPop = unpack(rows, 'pop'),
+            listofKab = [],
+            currentKab,
+            currentPop = [],
+            currentYear = [];
+
+        for (var i = 0; i < allNamaKab.length; i++ ){
+        if (listofKab.indexOf(allNamaKab[i]) === -1 ){
+        listofKab.push(allNamaKab[i]);
+        }
+        }
+
+        // mendapatkan nama kabupaten yang dipilih
+        function getKabData(kabTerpilih) {
+        currentPop = [];
+        currentYear = [];
+        for (var i = 0 ; i < allNamaKab.length ; i++){
+        if ( allNamaKab[i] === kabTerpilih ) {
+        currentPop.push(allPop[i]);
+        currentYear.push(allYear[i]);
+        } 
+        }
+        };
+
+        // mengatur default Kab Data
+        setBubblePlot('Kulonprogo');
+        function setBubblePlot(kabTerpilih) {
+        getKabData(kabTerpilih);  
+        
+        // mengatur bentuk grafik
+        var trace1 = {
+                    x: currentYear,
+                    y: currentPop,
+                    mode: 'lines+markers', // bentuk grafik adalah garis dan titik
+                    marker: {
+                        size: 12, 
+                        opacity: 0.5
+        }
+        };
+        //mendefinisikan bentuk grafik menjadi satu variabel independen
+        var data = [trace1];
+        // mendefinisikan layout grafik
+        var layout = {
+                    title: 'Jumlah Penduduk<br> Kabupaten/Kota '+ kabTerpilih,
+                    width: 500,
+                    height: 350,
+                    margin: {
+                            l: 100,
+                            r: 50,
+                            b: 50,
+                            t: 60,
+                            pad: 4
+                        },
+        };
+
+        //menampilkan grafik
+        Plotly.newPlot('plotdiv', data, layout, {showSendToCloud: true});
+        };
+
+        // membuat query pada data tabular
+        var innerContainer = document.querySelector('[data-num="0"'),
+        plotEl = innerContainer.querySelector('.plot'),
+        kabSelector = innerContainer.querySelector('.kabdata');
+
+        // mengatur jenis data selector yaitu berupa teks dalam array
+        function assignOptions(textArray, selector) {
+        for (var i = 0; i < textArray.length;  i++) {
+        var currentOption = document.createElement('option');
+        currentOption.text = textArray[i];
+        selector.appendChild(currentOption);
+        }
+        }
+        assignOptions(listofKab, kabSelector);
+
+        // mengupdate grafik jika selector diganti
+        function updateKab(){
+        setBubblePlot(kabSelector.value);
+        }
+        kabSelector.addEventListener('change', updateKab, false);
+        });
+</script>
+</body>
